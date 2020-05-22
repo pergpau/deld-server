@@ -17,8 +17,10 @@ async function verifyToken (token) {
   }
 };
 
+const open_urls = ['/login', '/register']
+
 async function authenticator (req, res, next) {
-  if (req.url == '/login' || req.url == '/register') {
+  if (open_urls.includes(req.url) || req.url.startsWith('/verify/')) {
     next()
   } else {
     const decoded = await verifyToken(req.get('Authorization'))

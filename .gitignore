@@ -120,3 +120,6 @@ dist
 
 #config
 config.js
+
+# sql
+sqlscript.sql

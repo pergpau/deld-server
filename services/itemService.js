@@ -55,6 +55,7 @@ module.exports = {
 
         const query = `INSERT INTO items (item_type, owner, category_id, title, description, author, rating)
                         VALUES ($1, $2, $3, $4, $5, $6, $7)
+                        RETURNING *
                         ;
                         `
         const result = await db.query(query, [item_type, owner, category_id, title, description, author, rating])

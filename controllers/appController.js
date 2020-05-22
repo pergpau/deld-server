@@ -2,8 +2,9 @@ const App = require('../services/appService');
 
 module.exports = {
     getCategories: async (req, res, next) => {
+        const parent_id = item_id = req.params.item_id
         try {
-            const category_map = await App.getCategories(res.locals.user_id)
+            const category_map = await App.getCategories(parent_id)
             if (category_map) {
                 res.status(200).send(category_map)
             } else {

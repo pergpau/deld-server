@@ -3,7 +3,7 @@ const Users = require('../services/userService');
 const { apiError } = require('../routes/error.js');
 
 module.exports = {
-    getUsersItems: async (req, res) => {
+    getUsersItems: async (req, res, next) => {
         try {
             const items = await Items.getAllUserItems(res.locals.user_id)
             if (items) {
@@ -12,13 +12,12 @@ module.exports = {
                 res.status(404).send("No items found")
             }
         }
-        catch (e) {
-            console.log(e.message)
-            res.status(500).send("Server error")
+        catch (err) {
+            next(err)
         }
     },
 
-    getItem: async (req, res) => {
+    getItem: async (req, res, next) => {
         try {
             const item_id = req.params.item_id
             const item = await Items.getItemByID(item_id)
@@ -28,17 +27,16 @@ module.exports = {
                 res.status(404).send(`No item with ID ${item_id} found.`)
             }
         }
-        catch (e) {
-            console.log(e.message)
-            res.status(500).send("Server error")
+        catch (err) {
+            next(err)
         }
     },
     newItem: async (req, res, next) => {
         try {
             const item_data = req.body
             item_data['user_id'] = res.locals.user_id
-            await Items.newItem(item_data)
-            res.status(200).send("Element added")
+            new_item = await Items.newItem(item_data)
+            res.status(200).send(new_item)
         }
         catch (err) {
             next(err)

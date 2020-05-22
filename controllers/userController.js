@@ -16,23 +16,37 @@ module.exports = {
             next(err)
         }
     },
-    
+
     newUser: async (req, res, next) => {
         try {
             const user_data = req.body
-            if (!user_data.password) {throw new apiError(404, "Password missing")}
-            await Users.createUser(user_data)
-            res.status(201).send("User created")
+            const validated = Users.validateNewUser(user_data)
+            if (validated) {
+                const new_user_data = await Users.createUser(user_data)
+                await Users.sendVerificationEmail(new_user_data)
+                res.status(201).send("User created")
+            }
         }
         catch (err) {
-            next(err)  
+            next(err)
         }
     },
-    
-    loginUser: async (req, res) => {
+
+    validateEmail: async (req, res, next) => {
         try {
-            console.log("trying to log in")
+            const validation_hash = req.params.validation_hash
+            await Users.validateEmail(validation_hash)
+            res.status(201).send("E-mail adress confirmed")
+        }
+        catch (err) {
+            next(err)
+        }
+    },
+
+    loginUser: async (req, res, next) => {
+        try {
             const login_data = req.body
+            console.log(login_data.username + ' trying to log in')
             const result = await Users.checkUsernamePassword(login_data)
             if (result) {
                 const token = await Users.generateJWTToken(result.user_id)
@@ -42,18 +56,17 @@ module.exports = {
                     first_name: result.first_name,
                     avatar_url: result.avatar_url
                 }
-                res.status(200).send({ token: token, user: user});
+                res.status(200).send({ token: token, user: user });
             } else {
                 res.status(401).send("Username or password doesn't match")
             }
         }
-        catch (e) {
-            console.log(e.message)
-            res.status(500).send("Server error")
+        catch (err) {
+            next(err)
         }
     },
 
-    seeTrusted: async (req, res) => {
+    seeTrusted: async (req, res, next) => {
         try {
             const user_id = 1
             //const circles = 1
@@ -64,26 +77,23 @@ module.exports = {
                 res.status(401).send("No people in your trust circles")
             }
         }
-        catch (e) {
-            console.log(e.message)
-            res.status(500).send("Server error")
+        catch (err) {
+            next(err)
         }
     },
-    getPossibleLenders: async (req, res) => {
+    getPossibleLenders: async (req, res, next) => {
         try {
             const user_id = res.locals.user_id
             console.log(user_id)
             const result = await Users.getPossibleLenders(user_id)
             if (result) {
-          
                 res.status(200).send(result)
             } else {
                 res.status(401).send("No results")
             }
         }
-        catch (e) {
-            console.log(e.message)
-            res.status(500).send("Server error")
+        catch (err) {
+            next(err)
         }
     },
 

@@ -12,6 +12,8 @@ module.exports = app => {
 
   router.post("/register", userController.newUser)
 
+  router.get("/verify/:validation_hash", userController.validateEmail)
+
   router.post("/login", userController.loginUser)
 
   router.get("/user/id/:user_id/items", itemController.getUsersItems);
