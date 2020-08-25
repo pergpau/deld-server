@@ -92,7 +92,6 @@ module.exports = {
             const searchstring = req.query.q ? req.query.q : ''
             const user_id = res.locals.user_id
             const trustees = await Users.getPossibleLenders(user_id)
-            console.log(trustees)
             const results = await Items.searchItems(searchstring, trustees)
             if (results) {
                 res.status(200).send(results)
@@ -103,5 +102,48 @@ module.exports = {
         catch (err) {
             next(err)
         }
-    }
+    },
+    getItemImages: async (req, res, next) => {
+        try {
+            const item_id = req.params.item_id
+            const images = await Items.getImages(item_id)
+            console.log(images)
+            res.status(200).send(images)
+        }
+        catch (err) {
+            next(err)
+        }
+    },
+    newImages: async (req, res, next) => {
+        const user_id = res.locals.user_id
+        const item_id = parseInt(req.params.item_id)
+        const item_id_array = Array(req.files.length).fill([item_id])
+        try {
+            const item = await Items.getItemByID(item_id)
+            if (item.owner != user_id) {
+                throw new apiError(401, 'User ID and owner ID does not match')
+            }
+            const image_ids = await Items.insertImages(item_id_array)
+            await Items.uploadImages(req.files, item_id, image_ids)
+            res.status(200).send("New image(s) uploaded")
+        } catch (err) {
+            next(err)
+        }
+    },
+    deleteImages: async (req, res, next) => {
+        const user_id = res.locals.user_id
+        const item_id = parseInt(req.params.item_id)
+        const image_ids = req.body
+        try {
+            const item = await Items.getItemByID(item_id)
+            if (item.owner != user_id) {
+                throw new apiError(401, 'User ID and owner ID does not match')
+            }
+            const deleted_image_ids = await Items.deleteImagesFromDB(image_ids.map(image_id => [image_id]))
+            await Items.deleteImagesFromBucket(item_id, image_ids)
+            res.status(200).send({message: "Image(s) deleted", ids: deleted_image_ids})
+        } catch (err) {
+            next(err)
+        }
+    },
 }

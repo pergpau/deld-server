@@ -17,7 +17,7 @@ class SQLError extends apiError {
         this.sqlmessage = sqlmessage;
     }
     toString() {
-        return "FDSAFASFSA" + this.message + this.sqlmessage
+        return "SQL Error:" + this.message + this.sqlmessage
     }
 };
 

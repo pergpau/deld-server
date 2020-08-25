@@ -120,6 +120,8 @@ dist
 
 #config
 config.js
+googlecloudservicekey.json
+firebaseservicekey.json
 
 # sql
 sqlscript.sql
